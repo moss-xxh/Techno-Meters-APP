@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title data-zh="多户账单" data-en="Multi-Account Bills">Multi-Account Bills</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="light-content">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#26A69A">
+    <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+    <meta name="apple-mobile-web-app-title" content="Multi-Account Bills">
+    <style>
+        /* 重置样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            background: #E5E5E7;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #F8F9FA;
+            color: #000;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            max-width: 414px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* 状态栏 - 苹果设计 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: #fff;
+            height: 44px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            min-width: 54px;
+        }
+
+        .status-time {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+            letter-spacing: -0.24px;
+        }
+
+        .status-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dynamic-island {
+            background: #000;
+            border-radius: 20px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .island-content {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #000;
+            min-width: 54px;
+            justify-content: flex-end;
+        }
+
+        .signal-bars {
+            display: flex;
+            gap: 2px;
+            align-items: flex-end;
+        }
+
+        .signal-bars span {
+            width: 3px;
+            background: #000;
+            border-radius: 1px;
+        }
+
+        .signal-bars span:nth-child(1) { height: 4px; }
+        .signal-bars span:nth-child(2) { height: 6px; }
+        .signal-bars span:nth-child(3) { height: 8px; }
+        .signal-bars span:nth-child(4) { height: 10px; }
+
+        .wifi-icon {
+            font-size: 15px;
+            color: #000;
+            margin: 0 2px;
+        }
+
+        .battery {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .battery-level {
+            font-size: 13px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .battery-icon {
+            width: 24px;
+            height: 12px;
+            border: 1px solid #000;
+            border-radius: 2px;
+            position: relative;
+            background: #fff;
+        }
+
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 3px;
+            width: 2px;
+            height: 6px;
+            background: #000;
+            border-radius: 0 1px 1px 0;
+        }
+
+        .battery-fill {
+            position: absolute;
+            left: 1px;
+            top: 1px;
+            bottom: 1px;
+            width: 80%;
+            background: #34C759;
+            border-radius: 1px;
+        }
+
+
+
+        /* 标题栏 */
+        .title-bar {
+            background: #fff;
+            border-bottom: 1px solid #F0F0F0;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            color: #000;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            position: absolute;
+            left: 20px;
+        }
+
+        .back-btn:hover {
+            background: #F0F0F0;
+        }
+
+        .title-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: #000;
+            letter-spacing: -0.02em;
+        }
+
+        /* 页面主要内容 */
+        .main-content {
+            padding: 20px;
+            padding-bottom: 120px;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            font-size: 15px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        /* Year Selector */
+        .year-selector {
+            display: flex;
+            justify-content: flex-start;
+            gap: 40px;
+            margin-bottom: 24px;
+            padding: 20px;
+        }
+
+        .year-tab {
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+            position: relative;
+        }
+
+        .year-tab.active {
+            color: #333;
+            font-weight: 600;
+            transform: scale(1.1);
+        }
+
+        /* User Card */
+        .user-card {
+            background: #fff;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000;
+            margin-right: 12px;
+        }
+
+        .user-name .star {
+            color: #FFB74D;
+            margin-right: 4px;
+        }
+
+        .user-type {
+            background: linear-gradient(135deg, #4CAF50, #45A049);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-details {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .user-detail-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: #999;
+            margin-right: 8px;
+            min-width: 80px;
+        }
+
+        .detail-value {
+            color: #000;
+            font-weight: 500;
+            font-family: 'SF Mono', Consolas, monospace;
+        }
+
+        /* Bill Section within User Card */
+        .bill-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #F0F0F0;
+        }
+
+        .bill-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Inline Bill Items */
+        .bill-item-inline {
+            margin-bottom: 12px;
+            border: 1px solid #F0F0F0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .bill-item-inline:hover {
+            border-color: #E0E0E0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .bill-item-inline .bill-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #F5F5F5;
+        }
+
+        .bill-item-inline .bill-details {
+            padding: 12px 16px;
+            background: #FAFBFC;
+        }
+
+        /* Bill List */
+        .bill-list {
+            margin-bottom: 20px;
+        }
+
+        .bill-item {
+            background: #fff;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .bill-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #F5F5F5;
+            cursor: pointer;
+        }
+
+        .bill-date {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .calendar-icon {
+            width: 32px;
+            height: 32px;
+            background: #000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .calendar-icon::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 14px;
+            border: 1px solid #fff;
+            border-radius: 2px;
+            top: 11px;
+            left: 7px;
+        }
+
+        .calendar-icon::after {
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: 11px;
+            width: 1px;
+            height: 4px;
+            background: #fff;
+            box-shadow: 8px 0 0 #fff;
+        }
+
+        .calendar-icon {
+            background: #000;
+        }
+
+        .calendar-icon:hover {
+            background: #333;
+        }
+
+        .date-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .month-year {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            line-height: 1.2;
+        }
+
+        .bill-period {
+            color: #666;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .arrow-right {
+            font-size: 16px;
+            color: #C0C0C0;
+            transition: all 0.2s ease;
+        }
+
+        .bill-header:hover .arrow-right {
+            transform: translateX(4px);
+            color: #999;
+        }
+
+        .bill-details {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #FAFBFC;
+        }
+
+        .bill-amount,
+        .bill-usage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .amount-value,
+        .usage-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 4px;
+            font-family: 'SF Mono', Consolas, monospace;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .amount-label,
+        .usage-label {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        /* More Button */
+        .more-btn {
+            text-align: center;
+            padding: 20px;
+            color: #000;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .more-btn:hover {
+            color: #333;
+        }
+
+        .more-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Hidden bills */
+        .bill-item.hidden,
+        .bill-item-inline.hidden {
+            display: none;
+        }
+
+        .home-indicator {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 134px;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        /* Animations */
+        .bill-item {
+            animation: slideIn 0.4s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .bill-item:nth-child(1) { animation-delay: 0.1s; }
+        .bill-item:nth-child(2) { animation-delay: 0.2s; }
+        .bill-item:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 375px) {
+            .year-selector {
+                gap: 24px;
+            }
+
+            .main-content {
+                padding: 16px;
+                padding-bottom: 120px;
+            }
+        }
+
+        /* Touch feedback */
+        .clickable {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .clickable:active {
+            transform: scale(0.98);
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 - 苹果设计 -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span class="status-time">9:41</span>
+        </div>
+        <div class="status-center">
+            <div class="dynamic-island">
+                <div class="island-content">🏠</div>
+            </div>
+        </div>
+        <div class="status-right">
+            <div class="signal-bars">
+                <span></span><span></span><span></span><span></span>
+            </div>
+            <i class="fas fa-wifi wifi-icon"></i>
+            <div class="battery">
+                <span class="battery-level">100</span>
+                <div class="battery-icon">
+                    <div class="battery-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="title-bar">
+        <button class="back-btn" onclick="goBack()">‹</button>
+        <h1 class="title-text" data-zh="账单管理" data-en="Bill Management">Bill Management</h1>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="main-content">
+        <!-- Year Selector -->
+        <div class="year-selector">
+            <div class="year-tab active" data-year="2025">2025<span data-zh="年" data-en=""></span></div>
+            <div class="year-tab" data-year="2024">2024<span data-zh="年" data-en=""></span></div>
+            <div class="year-tab" data-year="2023">2023<span data-zh="年" data-en=""></span></div>
+        </div>
+
+        <!-- User Card -->
+        <div class="user-card fade-in">
+            <div class="user-header">
+                <div class="user-info">
+                    <span class="user-name">
+                        <span class="star">*</span>
+                        <span data-zh="拉杰什·库马尔" data-en="Rajesh Kumar">Rajesh Kumar</span>
+                    </span>
+                    <span class="user-type" data-zh="住宅" data-en="Residential">Residential</span>
+                </div>
+            </div>
+            <div class="user-details">
+                <div class="user-detail-item">
+                    <span class="detail-label" data-zh="用电户号" data-en="Consumer No.">Consumer No.</span>
+                    <span class="detail-value">TN2025070110436366</span>
+                </div>
+                <div class="user-detail-item">
+                    <span class="detail-label" data-zh="用电地址" data-en="Address">Address</span>
+                    <span class="detail-value" data-zh="泰米尔纳德邦钦奈市安娜纳加尔区第42街******108号" data-en="No. 108, 42nd Street, Anna Nagar, Chennai, Tamil Nadu, India">No. 108, 42nd Street, Anna Nagar, Chennai, Tamil Nadu, India</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bill List -->
+        <div class="bill-list">
+            <!-- Bill Item 1 - September 2025 -->
+            <div class="bill-item clickable">
+                <div class="bill-header" onclick="viewBillDetail('2025-09')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年9月" data-en="Sep 2025">Sep 2025</div>
+                            <div class="bill-period">2025/09/01–2025/09/30</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹2,840</div>
+                        <div class="amount-label" data-zh="本期电费" data-en="Current Bill">Current Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">450</div>
+                        <div class="usage-label" data-zh="本期电量(kWh)" data-en="Current Usage (kWh)">Current Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Item 2 - August 2025 -->
+            <div class="bill-item clickable">
+                <div class="bill-header" onclick="viewBillDetail('2025-08')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年8月" data-en="Aug 2025">Aug 2025</div>
+                            <div class="bill-period">2025/08/01–2025/08/31</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹2,450</div>
+                        <div class="amount-label" data-zh="上期电费" data-en="Previous Bill">Previous Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">380</div>
+                        <div class="usage-label" data-zh="上期电量(kWh)" data-en="Previous Usage (kWh)">Previous Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Item 3 - July 2025 -->
+            <div class="bill-item clickable hidden" id="bill-3">
+                <div class="bill-header" onclick="viewBillDetail('2025-07')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年7月" data-en="Jul 2025">Jul 2025</div>
+                            <div class="bill-period">2025/07/01–2025/07/31</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹2,180</div>
+                        <div class="amount-label" data-zh="本期电费" data-en="Current Bill">Current Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">350</div>
+                        <div class="usage-label" data-zh="本期电量(kWh)" data-en="Current Usage (kWh)">Current Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Item 4 - June 2025 -->
+            <div class="bill-item clickable hidden" id="bill-4">
+                <div class="bill-header" onclick="viewBillDetail('2025-06')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年6月" data-en="Jun 2025">Jun 2025</div>
+                            <div class="bill-period">2025/06/01–2025/06/30</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹1,950</div>
+                        <div class="amount-label" data-zh="本期电费" data-en="Current Bill">Current Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">320</div>
+                        <div class="usage-label" data-zh="本期电量(kWh)" data-en="Current Usage (kWh)">Current Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Item 5 - May 2025 -->
+            <div class="bill-item clickable hidden" id="bill-5">
+                <div class="bill-header" onclick="viewBillDetail('2025-05')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年5月" data-en="May 2025">May 2025</div>
+                            <div class="bill-period">2025/05/01–2025/05/31</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹1,780</div>
+                        <div class="amount-label" data-zh="本期电费" data-en="Current Bill">Current Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">290</div>
+                        <div class="usage-label" data-zh="本期电量(kWh)" data-en="Current Usage (kWh)">Current Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Item 6 - April 2025 -->
+            <div class="bill-item clickable hidden" id="bill-6">
+                <div class="bill-header" onclick="viewBillDetail('2025-04')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年4月" data-en="Apr 2025">Apr 2025</div>
+                            <div class="bill-period">2025/04/01–2025/04/30</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹1,620</div>
+                        <div class="amount-label" data-zh="本期电费" data-en="Current Bill">Current Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">260</div>
+                        <div class="usage-label" data-zh="本期电量(kWh)" data-en="Current Usage (kWh)">Current Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Item 7 - March 2025 -->
+            <div class="bill-item clickable hidden" id="bill-7">
+                <div class="bill-header" onclick="viewBillDetail('2025-03')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年3月" data-en="Mar 2025">Mar 2025</div>
+                            <div class="bill-period">2025/03/01–2025/03/31</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹1,480</div>
+                        <div class="amount-label" data-zh="本期电费" data-en="Current Bill">Current Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">240</div>
+                        <div class="usage-label" data-zh="本期电量(kWh)" data-en="Current Usage (kWh)">Current Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Item 8 - February 2025 -->
+            <div class="bill-item clickable hidden" id="bill-8">
+                <div class="bill-header" onclick="viewBillDetail('2025-02')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年2月" data-en="Feb 2025">Feb 2025</div>
+                            <div class="bill-period">2025/02/01–2025/02/28</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹1,350</div>
+                        <div class="amount-label" data-zh="本期电费" data-en="Current Bill">Current Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">220</div>
+                        <div class="usage-label" data-zh="本期电量(kWh)" data-en="Current Usage (kWh)">Current Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Item 9 - January 2025 -->
+            <div class="bill-item clickable hidden" id="bill-9">
+                <div class="bill-header" onclick="viewBillDetail('2025-01')">
+                    <div class="bill-date">
+                        <div class="date-info">
+                            <div class="month-year" data-zh="2025年1月" data-en="Jan 2025">Jan 2025</div>
+                            <div class="bill-period">2025/01/01–2025/01/31</div>
+                        </div>
+                    </div>
+                    <span class="arrow-right">›</span>
+                </div>
+                <div class="bill-details">
+                    <div class="bill-amount">
+                        <div class="amount-value">₹1,280</div>
+                        <div class="amount-label" data-zh="本期电费" data-en="Current Bill">Current Bill</div>
+                    </div>
+                    <div class="bill-usage">
+                        <div class="usage-value">200</div>
+                        <div class="usage-label" data-zh="本期电量(kWh)" data-en="Current Usage (kWh)">Current Usage (kWh)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More/Less Toggle Button -->
+            <div class="more-btn clickable" onclick="toggleBills()" id="toggle-btn">
+                <span id="toggle-text" data-zh="查看更多" data-en="Show More">Show More</span>
+                <span id="toggle-arrow">▼</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Home指示器 -->
+    <div class="home-indicator"></div>
+
+    <script>
+        // 默认使用英文
+        let currentLanguage = 'en';
+
+        // 语言切换功能
+        function updateTexts() {
+            document.querySelectorAll('[data-zh]').forEach(element => {
+                const text = element.getAttribute(`data-${currentLanguage}`);
+                if (text) {
+                    element.textContent = text;
+                }
+            });
+        }
+
+        // 添加动画效果
+        function addAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.fade-in').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.5s ease-out';
+                observer.observe(el);
+            });
+        }
+
+
+        // 触摸反馈
+        function addTouchFeedback() {
+            const clickableElements = document.querySelectorAll('.clickable, .year-tab, .back-btn');
+
+            clickableElements.forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                    this.style.opacity = '0.8';
+                }, { passive: true });
+
+                element.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.opacity = '1';
+                }, { passive: true });
+
+                element.addEventListener('touchcancel', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.opacity = '1';
+                }, { passive: true });
+            });
+        }
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const timeElement = document.querySelector('.status-time');
+            if (timeElement) {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                timeElement.textContent = `${hours}:${minutes}`;
+            }
+        }
+
+        // 返回按钮
+        function goBack() {
+            window.location.href = '001.html';
+        }
+
+        // 页面功能函数
+        function viewBillDetail(billMonth) {
+            // 根据月份跳转到对应的账单详情页面
+            if (billMonth === '2025-08') {
+                window.location.href = 'bill-detail-august.html';
+            } else if (billMonth === '2025-09') {
+                window.location.href = `bill-detail-new.html?month=${billMonth}`;
+            } else {
+                // 其他月份仍然使用原来的页面
+                window.location.href = `bill-detail-new.html?month=${billMonth}`;
+            }
+        }
+
+        function toggleBills() {
+            const hiddenBills = document.querySelectorAll('.bill-item.hidden');
+            const allBills = document.querySelectorAll('.bill-item');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleArrow = document.getElementById('toggle-arrow');
+
+            if (hiddenBills.length > 0) {
+                // 当前有隐藏的账单，显示更多
+                hiddenBills.forEach(bill => {
+                    bill.classList.remove('hidden');
+                });
+                toggleText.textContent = currentLanguage === 'en' ? 'Show Less' : '收起';
+                toggleArrow.textContent = '▲';
+            } else {
+                // 当前没有隐藏的账单，收起（隐藏第3个及以后的账单）
+                allBills.forEach((bill, index) => {
+                    if (index >= 2) { // 只显示前2个账单
+                        bill.classList.add('hidden');
+                    }
+                });
+                toggleText.textContent = currentLanguage === 'en' ? 'Show More' : '查看更多';
+                toggleArrow.textContent = '▼';
+            }
+        }
+
+        // 年份切换
+        function setupYearTabs() {
+            const yearTabs = document.querySelectorAll('.year-tab');
+            yearTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    yearTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const year = this.dataset.year;
+                    showToast(currentLanguage === 'en' ? `Switched to ${year}` : `切换到${year}年`);
+                });
+            });
+        }
+
+        // 显示提示消息
+        function showToast(message, duration = 2000) {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 10000;
+                animation: fadeInOut ${duration}ms ease-in-out;
+            `;
+
+            if (!document.querySelector('#toastAnimation')) {
+                const style = document.createElement('style');
+                style.id = 'toastAnimation';
+                style.textContent = `
+                    @keyframes fadeInOut {
+                        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                        15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, duration);
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTexts(); // 初始化文本
+            addAnimations();
+            addTouchFeedback();
+            setupYearTabs();
+
+            // 更新时间显示
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 60000);
+        });
+
+
+        // 防止页面缩放
+        document.addEventListener('touchmove', function(event) {
+            if (event.scale !== 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        // 防止双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>

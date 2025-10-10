@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title data-zh="电费账单详情" data-en="Electricity Bill Details">Electricity Bill Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="light-content">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#26A69A">
+    <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+    <meta name="apple-mobile-web-app-title" content="Electricity Bill Details">
+    <style>
+        /* 重置样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            background: #E5E5E7;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #F8F9FA;
+            color: #000;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            max-width: 450px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 状态栏 - 苹果设计 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: #fff;
+            height: 44px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-time {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .status-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dynamic-island {
+            background-color: #000;
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            height: 36px;
+        }
+
+        .island-content {
+            font-size: 16px;
+            filter: brightness(1.2);
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .signal-bars {
+            display: flex;
+            gap: 2px;
+            align-items: flex-end;
+            height: 12px;
+        }
+
+        .signal-bars span {
+            width: 3px;
+            background-color: #000;
+            border-radius: 1px;
+        }
+
+        .signal-bars span:nth-child(1) { height: 3px; }
+        .signal-bars span:nth-child(2) { height: 6px; }
+        .signal-bars span:nth-child(3) { height: 9px; }
+        .signal-bars span:nth-child(4) { height: 12px; }
+
+        .wifi-icon {
+            font-size: 12px;
+            color: #000;
+        }
+
+        .battery {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .battery-level {
+            font-size: 12px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .battery-icon {
+            width: 24px;
+            height: 12px;
+            border: 1px solid #000;
+            border-radius: 2px;
+            position: relative;
+            background-color: #fff;
+        }
+
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 3px;
+            width: 2px;
+            height: 6px;
+            background-color: #000;
+            border-radius: 0 1px 1px 0;
+        }
+
+        .battery-fill {
+            width: 90%;
+            height: 100%;
+            background-color: #000;
+            border-radius: 1px;
+        }
+
+        /* 标题栏 */
+        .title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #E5E5E7;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #000;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .back-btn:hover {
+            background-color: #F8F9FA;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* 使用详情 */
+        .usage-section {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #000;
+        }
+
+        /* 账单月份标题 */
+        .bill-month-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .month-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #000;
+            margin: 0;
+        }
+
+        /* 账单信息汇总 */
+        .bill-summary-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .bill-summary-card .bill-month-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #F5F5F5;
+        }
+
+        .month-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            margin: 0;
+            text-align: left;
+        }
+
+        .period-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .period-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .period-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .period-value {
+            font-size: 16px;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .bill-summary-card .period-item {
+            margin-bottom: 20px;
+        }
+
+        .usage-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+
+
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: #F8F9FA;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 4px;
+        }
+
+        .stat-unit {
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .stat-reading {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 费用明细汇总 */
+        .fee-summary-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .fee-summary-table {
+            width: 100%;
+        }
+
+        .summary-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.5fr;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+            margin-bottom: 8px;
+        }
+
+        .summary-header-cell {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .summary-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.5fr;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+            align-items: center;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row.total-row {
+            border-top: 1px solid #F0F0F0;
+            margin-top: 8px;
+            padding-top: 16px;
+            background: #FAFBFC;
+            border-radius: 8px;
+            padding: 16px 12px;
+        }
+
+        .summary-cell {
+            font-size: 14px;
+            color: #000;
+            text-align: center;
+        }
+
+        .summary-cell.amount {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .summary-cell.description {
+            font-size: 12px;
+            color: #666;
+            text-align: left;
+        }
+
+        .total-label {
+            font-size: 16px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .total-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 16px;
+        }
+
+        /* 阶梯电量使用情况 */
+        .tiered-usage {
+            background-color: #fff;
+            margin: 0 0 20px 0;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .unit {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 当前阶梯指示器 */
+        .current-tier {
+            background: #F8F9FA;
+            color: #000;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .current-tier strong {
+            font-weight: 700;
+            color: #000;
+        }
+
+        .cumulative-usage {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            padding: 12px;
+            background: #FAFBFC;
+            border-radius: 8px;
+        }
+
+        .cumulative-usage .label {
+            color: #666;
+        }
+
+        .cumulative-usage .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        /* 进度条 */
+        .tier-progress {
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background-color: #F0F0F0;
+            border-radius: 2px;
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .progress-indicator {
+            position: absolute;
+            top: -4px;
+            width: 12px;
+            height: 12px;
+            background-color: #000;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tier-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .tier-label {
+            text-align: center;
+            flex: 1;
+        }
+
+        .tier-name {
+            display: block;
+            color: #000;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .tier-range {
+            color: #666;
+        }
+
+        /* 阶梯电价详情表格 */
+        .tier-pricing-card {
+            background-color: #fff;
+            margin: 0 0 20px 0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .tier-pricing-table {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #F0F0F0;
+        }
+
+        .pricing-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            background: #F8F9FA;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .pricing-header-cell {
+            padding: 12px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-align: center;
+            border-right: 1px solid #F0F0F0;
+        }
+
+        .pricing-header-cell:last-child {
+            border-right: none;
+        }
+
+        .pricing-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            border-bottom: 1px solid #F0F0F0;
+            transition: background-color 0.2s;
+        }
+
+        .pricing-row:last-child {
+            border-bottom: none;
+        }
+
+        .pricing-row:hover {
+            background-color: #F8F9FA;
+        }
+
+        .pricing-cell {
+            padding: 14px 8px;
+            font-size: 13px;
+            text-align: center;
+            border-right: 1px solid #F0F0F0;
+            color: #333;
+        }
+
+        .pricing-cell:last-child {
+            border-right: none;
+        }
+
+        .pricing-cell.tier-name {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .pricing-cell.usage {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .pricing-cell.amount {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .pricing-row.total-row {
+            background-color: #F8F9FA;
+            border-top: 2px solid #000;
+        }
+
+        .pricing-cell.total-label {
+            font-weight: 700;
+            color: #000;
+            font-size: 14px;
+        }
+
+        .pricing-cell.total-usage {
+            font-weight: 700;
+            color: #000;
+            font-size: 14px;
+        }
+
+        .pricing-cell.total-amount {
+            font-weight: 700;
+            color: #000;
+            font-size: 14px;
+        }
+
+        /* 图表样式 */
+        .chart-section {
+            padding: 20px;
+        }
+
+        .chart-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            width: calc(100% + 40px);
+            margin-left: -20px;
+            margin-right: -20px;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .pie-chart {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .pie-chart svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .pie-chart path {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            stroke-width: 1;
+            stroke: #fff;
+        }
+
+        .pie-chart path:hover {
+            transform: scale(1.05);
+            transform-origin: center;
+            filter: brightness(1.1) saturate(1.2);
+            stroke-width: 2;
+        }
+
+        .chart-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .total-usage {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .total-label {
+            font-size: 10px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 悬停提示框 - ECharts风格 */
+        .tooltip {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transform: translateY(10px);
+        }
+
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tooltip strong {
+            color: #000;
+            font-weight: 600;
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border: 6px solid transparent;
+            border-top-color: rgba(255, 255, 255, 0.95);
+        }
+
+        /* ECharts风格图例 */
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .legend-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .legend-item:hover .legend-color {
+            transform: scale(1.2);
+        }
+
+        .legend-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .legend-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            line-height: 1;
+        }
+
+        .legend-value {
+            font-size: 12px;
+            color: #666;
+            font-weight: 400;
+            line-height: 1;
+        }
+
+        /* 简化的统计卡片 */
+        .stats-grid {
+            display: flex;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .stat-card {
+            flex: 1;
+            text-align: center;
+            padding: 12px 6px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card .legend-color {
+            width: 8px;
+            height: 8px;
+            margin: 0 auto 8px auto;
+        }
+
+        .stat-card .legend-label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 4px;
+            line-height: 1.1;
+        }
+
+        .stat-card .legend-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        .stat-card .legend-percentage {
+            font-size: 10px;
+            color: #999;
+            margin-top: 0;
+            line-height: 1.1;
+        }
+
+        /* Tab切换样式 */
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .tab-switcher {
+            display: flex;
+            background: #F8F9FA;
+            border-radius: 20px;
+            padding: 4px;
+            gap: 2px;
+        }
+
+        .tab-button {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 60px;
+        }
+
+        .tab-button.active {
+            background: #000;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #E5E5E7;
+            color: #333;
+        }
+
+        /* 图表内容切换 */
+        .chart-content {
+            display: none !important;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .chart-content.active {
+            display: block !important;
+            opacity: 1;
+        }
+
+        /* 查看明细按钮样式 */
+        .detail-btn-container {
+            margin-top: -20px;
+            text-align: center;
+        }
+
+        .detail-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #F8F9FA;
+            border: 1px solid #E5E5E7;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 120px;
+        }
+
+        .detail-btn:hover {
+            background: #E5E5E7;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-btn-text {
+            font-size: 14px;
+            color: #000;
+        }
+
+        .detail-btn-arrow {
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: transform 0.2s ease;
+        }
+
+        .detail-btn:hover .detail-btn-arrow {
+            transform: translateX(2px);
+            color: #000;
+        }
+
+        /* 动画效果 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tab 导航样式 */
+        .tab-nav {
+            display: flex;
+            justify-content: space-around;
+            position: relative;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 16px 0;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-item.active {
+            color: #000;
+            font-weight: 600;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #000;
+            border-radius: 1px;
+        }
+
+        .tab-item:hover {
+            color: #000;
+        }
+
+        /* Tab 内容区域 */
+        .tab-content-area {
+            padding: 0;
+            margin-top: 16px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 详情卡片样式 */
+        .detail-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 详情页图表样式 - 恢复灰色背景 */
+        .chart-container {
+            height: 250px;
+            margin: 0;
+            position: relative;
+            padding: 0;
+            overflow: visible;
+        }
+
+        /* 账单卡片内图表容器样式 */
+        .detail-chart-container {
+            height: 320px;
+            background: #F8F9FA;
+            border-radius: 12px;
+            margin: 16px 0;
+            position: relative;
+            padding: 5px;
+            overflow: visible;
+        }
+
+        .simple-chart {
+            width: 100%;
+            height: 310px;
+            position: relative;
+            padding: 10px 30px 5px 30px;
+            overflow: visible;
+        }
+
+        .chart-line {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chart-line:hover {
+            transform: scale(1.5);
+        }
+
+        .chart-line.usage {
+            background: #007AFF;
+            z-index: 2;
+        }
+
+        .chart-line.cost {
+            background: #FF6B35;
+            z-index: 2;
+        }
+
+        .chart-line.hidden {
+            display: none;
+        }
+
+        .chart-path {
+            position: absolute;
+            height: 2px;
+            transform-origin: left center;
+            transition: opacity 0.3s ease;
+        }
+
+        .chart-path.usage {
+            background: #007AFF;
+            z-index: 1;
+        }
+
+        .chart-path.cost {
+            background: #FF6B35;
+            z-index: 1;
+        }
+
+        .chart-path.hidden {
+            opacity: 0;
+        }
+
+        .axis-label {
+            position: absolute;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .axis-label.x {
+            bottom: -15px;
+            transform: translateX(-50%);
+        }
+
+        .axis-label.y-left {
+            left: -35px;
+            color: #007AFF;
+            font-weight: 600;
+        }
+
+        .axis-label.y-right {
+            right: -35px;
+            color: #FF6B35;
+            font-weight: 600;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .chart-line-usage {
+            stroke: #007AFF;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .chart-line-cost {
+            stroke: #FF6B35;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .chart-area-usage {
+            fill: url(#gradientUsage);
+            opacity: 0.3;
+        }
+
+        .chart-area-cost {
+            fill: url(#gradientCost);
+            opacity: 0.2;
+        }
+
+        .chart-dot {
+            r: 4;
+            cursor: pointer;
+            transition: r 0.2s ease;
+        }
+
+        .chart-dot:hover {
+            r: 6;
+        }
+
+        .chart-dot-usage {
+            fill: #007AFF;
+        }
+
+        .chart-dot-cost {
+            fill: #FF6B35;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            background: #F8F9FA;
+            border: 1px solid #E5E5E7;
+        }
+
+        .legend-item:hover {
+            background: #E5E5E7;
+            transform: translateY(-1px);
+        }
+
+        .legend-item.disabled {
+            opacity: 0.5;
+            background: #F0F0F0;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            transition: opacity 0.2s ease;
+        }
+
+        .legend-color.usage {
+            background: #007AFF;
+        }
+
+        .legend-color.cost {
+            background: #FF6B35;
+        }
+
+        .legend-text {
+            font-size: 14px;
+            color: #666;
+            transition: color 0.2s ease;
+        }
+
+        .legend-item.disabled .legend-text {
+            color: #999;
+        }
+
+        /* 数据类型切换按钮 */
+        .data-type-selector {
+            display: flex;
+            gap: 6px;
+        }
+
+        .data-type-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #F0F0F0;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .data-type-btn:hover {
+            background: #E5E5E7;
+            transform: scale(1.05);
+        }
+
+        .data-type-btn.active {
+            background: #000;
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .data-type-btn i {
+            font-size: 12px;
+        }
+
+        /* 日历相关样式 */
+        .calendar-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-container {
+            margin: 20px 0;
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            margin-bottom: 8px;
+        }
+
+        .calendar-container-wrapper {
+            margin: 16px 0;
+        }
+
+        .weekday {
+            padding: 12px 4px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            background: #F8F9FA;
+            border-radius: 6px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0;
+        }
+
+        .calendar-day {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 40px;
+            background: transparent;
+        }
+
+        .calendar-day:hover {
+            background: #F8F9FA;
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+            cursor: default;
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 2px;
+        }
+
+        .day-value {
+            font-size: 10px;
+            font-weight: 400;
+            color: #666;
+        }
+
+        /* 日历高亮 */
+        .calendar-day.highest {
+            background: #FFE8E8;
+            border-radius: 4px;
+        }
+
+        .calendar-day.lowest {
+            background: #E8F4E8;
+            border-radius: 4px;
+        }
+
+        .calendar-day.highest:hover {
+            background: #FFD6D6;
+        }
+
+        .calendar-day.lowest:hover {
+            background: #D6EAD6;
+        }
+
+        /* 日历图例 */
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        .calendar-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .calendar-legend .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .calendar-legend .legend-color.highest {
+            background: #FFE8E8;
+        }
+
+        .calendar-legend .legend-color.lowest {
+            background: #E8F4E8;
+        }
+
+        /* 图表工具提示 */
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 20;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(10px);
+        }
+
+        .chart-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chart-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, 0.9);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 375px) {
+            .usage-section {
+                padding: 16px;
+            }
+
+            .tab-content-area {
+                padding: 16px;
+            }
+
+            .detail-card {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+        }
+
+        /* Tab 样式 */
+        .tab-nav {
+            display: flex;
+            justify-content: space-around;
+            position: relative;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 16px 0;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-item.active {
+            color: #000;
+            font-weight: 600;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #000;
+            border-radius: 1px;
+        }
+
+        .tab-item:hover {
+            color: #000;
+        }
+
+        .tab-content-area {
+            padding: 0;
+            margin-top: 16px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+            max-width: 200px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-tooltip.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 - 苹果设计 -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span class="status-time">9:41</span>
+        </div>
+        <div class="status-center">
+            <div class="dynamic-island">
+                <div class="island-content">🏠</div>
+            </div>
+        </div>
+        <div class="status-right">
+            <div class="signal-bars">
+                <span></span><span></span><span></span><span></span>
+            </div>
+            <i class="fas fa-wifi wifi-icon"></i>
+            <div class="battery">
+                <span class="battery-level">100</span>
+                <div class="battery-icon">
+                    <div class="battery-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="title-bar">
+        <div class="back-btn" onclick="goBack()">
+            <i class="fas fa-chevron-left"></i>
+            <span data-zh="返回" data-en="Back">Back</span>
+        </div>
+        <h1 class="page-title" data-zh="电费账单详情" data-en="Bill Details">Bill Details</h1>
+        <div></div>
+    </div>
+
+    <!-- 账单信息 -->
+    <div class="usage-section">
+        <!-- 账单信息汇总 -->
+
+
+        <!-- August 2025账单摘要 -->
+        <div class="bill-summary-card">
+            <div class="bill-month-header">
+                <h2 class="month-title">August 2025</h2>
+            </div>
+            <div class="period-item">
+                <span class="period-label">Bill Period:</span>
+                <span class="period-value">2025/08/01-2025/08/31</span>
+            </div>
+            <div class="usage-stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Current Usage</div>
+                    <div class="stat-value">380 <span class="stat-unit">kWh</span></div>
+                    <div class="stat-reading">(5826 — 6206)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Current Bill</div>
+                    <div class="stat-value">₹2,450</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 费用明细汇总 -->
+        <div class="fee-summary-card">
+            <h3 class="card-title">Fee Details</h3>
+            <div class="fee-summary-table">
+                <div class="summary-header">
+                    <div class="summary-header-cell">Item</div>
+                    <div class="summary-header-cell">Amount (₹)</div>
+                    <div class="summary-header-cell">Description</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-cell">Energy charges</div>
+                    <div class="summary-cell amount">₹2,028</div>
+                    <div class="summary-cell description">380 kWh × Time-of-Use Rate</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-cell">Fixed charges</div>
+                    <div class="summary-cell amount">₹50</div>
+                    <div class="summary-cell description">Monthly Fixed Service Fee</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-cell">FPPPA charges</div>
+                    <div class="summary-cell amount">₹81</div>
+                    <div class="summary-cell description">4% × Energy charges</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-cell">Government duty</div>
+                    <div class="summary-cell amount">₹291</div>
+                    <div class="summary-cell description">5% × (Electricity + Fixed + Fuel)</div>
+                </div>
+                <div class="summary-row total-row">
+                    <div class="summary-cell total-label">Electricity Cost</div>
+                    <div class="summary-cell total-amount">₹2,450</div>
+                    <div class="summary-cell"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 时段电价详情表格 -->
+        <div class="tier-pricing-card">
+            <h3 class="card-title">Time-of-Use Rate Details</h3>
+            <div class="tier-pricing-table">
+                <div class="pricing-header">
+                    <div class="pricing-header-cell">Time Period</div>
+                    <div class="pricing-header-cell">Usage (kWh)</div>
+                    <div class="pricing-header-cell">Rate(₹/kWh)</div>
+                    <div class="pricing-header-cell">Amount(₹)</div>
+                </div>
+                <div class="pricing-row">
+                    <div class="pricing-cell tier-name">Peak Hours<br/>(12:00-18:00)</div>
+                    <div class="pricing-cell usage">150</div>
+                    <div class="pricing-cell">₹5.40</div>
+                    <div class="pricing-cell amount">₹810.00</div>
+                </div>
+                <div class="pricing-row">
+                    <div class="pricing-cell tier-name">Normal Hours<br/>(08:00-12:00 & 18:00-23:00)</div>
+                    <div class="pricing-cell usage">130</div>
+                    <div class="pricing-cell">₹4.50</div>
+                    <div class="pricing-cell amount">₹585.00</div>
+                </div>
+                <div class="pricing-row">
+                    <div class="pricing-cell tier-name">Off-peak Hours<br/>(23:00-08:00)</div>
+                    <div class="pricing-cell usage">100</div>
+                    <div class="pricing-cell">₹6.33</div>
+                    <div class="pricing-cell amount">₹633.00</div>
+                </div>
+                <div class="pricing-row total-row">
+                    <div class="pricing-cell total-label">Subtotal</div>
+                    <div class="pricing-cell total-usage">380</div>
+                    <div class="pricing-cell"></div>
+                    <div class="pricing-cell total-amount">₹2,028.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用电分析图表 -->
+        <div class="chart-section">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="card-title" data-zh="用电分析" data-en="Usage Analysis">Usage Analysis</h3>
+                    <div class="tab-switcher">
+                        <button class="tab-button active" onclick="switchTab('usage')" data-zh="电量" data-en="Usage">Usage</button>
+                        <button class="tab-button" onclick="switchTab('cost')" data-zh="金额" data-en="Cost">Cost</button>
+                    </div>
+                </div>
+
+                <!-- 电量分析 -->
+                <div class="chart-content active" id="usageContent">
+                    <div class="chart-container">
+                        <div class="pie-chart" id="usageChart">
+                            <svg width="320" height="320" viewBox="0 0 320 320">
+                                <!-- 图表将由JavaScript动态生成 -->
+                            </svg>
+                            <div class="chart-center">
+                                <div class="total-usage">380</div>
+                                <div class="total-label">Total Usage (kWh)</div>
+                            </div>
+                            <div class="tooltip" id="usageTooltip"></div>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="legend-color" style="background: #ee6666;"></div>
+                            <div class="legend-label">Peak Hours</div>
+                            <div class="legend-value">150 kWh</div>
+                            <div class="legend-percentage">39.5%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="legend-color" style="background: #5470c6;"></div>
+                            <div class="legend-label">Normal Hours</div>
+                            <div class="legend-value">130 kWh</div>
+                            <div class="legend-percentage">34.2%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="legend-color" style="background: #91cc75;"></div>
+                            <div class="legend-label">Off-peak Hours</div>
+                            <div class="legend-value">100 kWh</div>
+                            <div class="legend-percentage">26.3%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 金额分析 -->
+                <div class="chart-content" id="costContent">
+                    <div class="chart-container">
+                        <div class="pie-chart" id="costChart">
+                            <svg width="320" height="320" viewBox="0 0 320 320">
+                                <!-- 图表将由JavaScript动态生成 -->
+                            </svg>
+                            <div class="chart-center">
+                                <div class="total-usage">₹2,028</div>
+                                <div class="total-label">Electricity Cost</div>
+                            </div>
+                            <div class="tooltip" id="costTooltip"></div>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="legend-color" style="background: #ee6666;"></div>
+                            <div class="legend-label">Peak Hours</div>
+                            <div class="legend-value">₹810</div>
+                            <div class="legend-percentage">39.9%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="legend-color" style="background: #91cc75;"></div>
+                            <div class="legend-label">Off-peak Hours</div>
+                            <div class="legend-value">₹633</div>
+                            <div class="legend-percentage">31.2%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="legend-color" style="background: #5470c6;"></div>
+                            <div class="legend-label">Normal Hours</div>
+                            <div class="legend-value">₹585</div>
+                            <div class="legend-percentage">28.9%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能完整的卡片 -->
+        <div class="bill-summary-card">
+            <!-- Tab 导航 -->
+            <div class="tab-nav">
+                <button class="tab-item active" onclick="switchDetailTab2('cumulative')">Cumulative Trend</button>
+                <button class="tab-item" onclick="switchDetailTab2('daily')">Daily Details</button>
+            </div>
+
+            <!-- Tab 内容区域 -->
+            <div class="tab-content-area" style="padding: 0; margin-top: -14px;">
+                <!-- 累计趋势 Tab -->
+                <div class="tab-content active" id="cumulative-detail-tab2">
+                    <!-- 累计图表 -->
+                    <div class="chart-container">
+                        <div class="simple-chart" id="detailSimpleChart2">
+                            <!-- 图表将通过JavaScript生成 -->
+                        </div>
+                        <div class="chart-tooltip" id="detailChartTooltip2"></div>
+                    </div>
+                </div>
+
+                <!-- 每日明细 Tab -->
+                <div class="tab-content" id="daily-detail-tab2">
+                    <!-- 日历视图 -->
+                    <div class="calendar-container-wrapper">
+                        <div class="calendar-title-row" style="margin-bottom: 12px;">
+                            <h3 class="card-title" id="calendar-month-title2" style="margin-bottom: 0;">August 2025</h3>
+                            <div class="data-type-selector">
+                                <button class="data-type-btn active" onclick="switchDetailDataType2('usage')" id="detail-usage-btn2">
+                                    <i class="fas fa-bolt"></i>
+                                </button>
+                                <button class="data-type-btn" onclick="switchDetailDataType2('cost')" id="detail-cost-btn2">
+                                    <i class="fas fa-rupee-sign"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <div class="weekday" data-zh="日" data-en="Sun">Sun</div>
+                                <div class="weekday" data-zh="一" data-en="Mon">Mon</div>
+                                <div class="weekday" data-zh="二" data-en="Tue">Tue</div>
+                                <div class="weekday" data-zh="三" data-en="Wed">Wed</div>
+                                <div class="weekday" data-zh="四" data-en="Thu">Thu</div>
+                                <div class="weekday" data-zh="五" data-en="Fri">Fri</div>
+                                <div class="weekday" data-zh="六" data-en="Sat">Sat</div>
+                            </div>
+                            <div class="calendar-grid" id="detailCalendarGrid2">
+                                <!-- 日历格子将通过JavaScript生成 -->
+                            </div>
+                        </div>
+
+                        <!-- 图例 -->
+                        <div class="calendar-legend">
+                            <div class="legend-item">
+                                <div class="legend-color highest"></div>
+                                <span data-zh="月度峰值" data-en="Monthly Peak">Monthly Peak</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color lowest"></div>
+                                <span data-zh="月度低值" data-en="Monthly Low">Monthly Low</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <script>
+
+        // 创建环形图
+        function createDonutChart(containerId, data, total, unit) {
+            const container = document.getElementById(containerId);
+            const svg = container.querySelector('svg');
+            const tooltip = container.querySelector('.tooltip');
+            const centerX = 160;
+            const centerY = 160;
+            const outerRadius = 150;
+            const innerRadius = 100; // 环形图内径
+
+            // 清空现有路径
+            const paths = svg.querySelectorAll('path');
+            paths.forEach(path => path.remove());
+
+            let currentAngle = -90; // 从顶部开始
+
+            data.forEach((item, index) => {
+                const percentage = item.value / total;
+                const angle = percentage * 360;
+
+                if (angle > 0) {
+                    const startAngle = currentAngle * Math.PI / 180;
+                    const endAngle = (currentAngle + angle) * Math.PI / 180;
+
+                    // 外圆弧
+                    const outerStartX = centerX + outerRadius * Math.cos(startAngle);
+                    const outerStartY = centerY + outerRadius * Math.sin(startAngle);
+                    const outerEndX = centerX + outerRadius * Math.cos(endAngle);
+                    const outerEndY = centerY + outerRadius * Math.sin(endAngle);
+
+                    // 内圆弧
+                    const innerStartX = centerX + innerRadius * Math.cos(startAngle);
+                    const innerStartY = centerY + innerRadius * Math.sin(startAngle);
+                    const innerEndX = centerX + innerRadius * Math.cos(endAngle);
+                    const innerEndY = centerY + innerRadius * Math.sin(endAngle);
+
+                    const largeArcFlag = angle > 180 ? 1 : 0;
+
+                    const pathData = `
+                        M ${outerStartX},${outerStartY}
+                        A ${outerRadius},${outerRadius} 0 ${largeArcFlag},1 ${outerEndX},${outerEndY}
+                        L ${innerEndX},${innerEndY}
+                        A ${innerRadius},${innerRadius} 0 ${largeArcFlag},0 ${innerStartX},${innerStartY}
+                        Z
+                    `;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', pathData);
+                    path.setAttribute('fill', item.color);
+                    path.setAttribute('stroke', '#fff');
+                    path.setAttribute('stroke-width', '2');
+
+                    // 添加悬停事件
+                    path.addEventListener('mouseenter', function(e) {
+                        showTooltip(e, tooltip, item, percentage, unit);
+                    });
+
+                    path.addEventListener('mousemove', function(e) {
+                        updateTooltipPosition(e, tooltip);
+                    });
+
+                    path.addEventListener('mouseleave', function() {
+                        hideTooltip(tooltip);
+                    });
+
+                    // 触摸事件支持
+                    path.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        showTooltip(e.touches[0], tooltip, item, percentage, unit);
+                    });
+
+                    path.addEventListener('touchend', function() {
+                        setTimeout(() => hideTooltip(tooltip), 2000);
+                    });
+
+                    svg.appendChild(path);
+
+                    currentAngle += angle;
+                }
+            });
+
+            // 更新中心数值
+            const totalUsage = container.querySelector('.total-usage');
+            const totalLabel = container.querySelector('.total-label');
+            totalUsage.textContent = unit + total.toLocaleString();
+            totalLabel.textContent = unit.includes('₹') ? 'Total Cost' : 'Total Usage (kWh)';
+        }
+
+        // 显示提示框
+        function showTooltip(event, tooltip, item, percentage, unit) {
+            const percentageText = (percentage * 100).toFixed(1) + '%';
+            const valueText = unit + item.value.toLocaleString();
+            tooltip.innerHTML = `<strong>${item.label}</strong><br/>${valueText} (${percentageText})`;
+            tooltip.classList.add('show');
+            updateTooltipPosition(event, tooltip);
+        }
+
+        // 更新提示框位置
+        function updateTooltipPosition(event, tooltip) {
+            const rect = tooltip.parentElement.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            tooltip.style.left = (x + 10) + 'px';
+            tooltip.style.top = (y - 40) + 'px';
+        }
+
+        // 隐藏提示框
+        function hideTooltip(tooltip) {
+            tooltip.classList.remove('show');
+        }
+
+        // Tab切换功能
+        function switchTab(tabType) {
+            // 更新按钮状态
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 更新内容显示
+            const contents = document.querySelectorAll('.chart-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            if (tabType === 'usage') {
+                document.getElementById('usageContent').classList.add('active');
+            } else if (tabType === 'cost') {
+                document.getElementById('costContent').classList.add('active');
+            }
+
+            // 添加切换动画效果
+            const activeContent = document.querySelector('.chart-content.active');
+            activeContent.style.opacity = '0';
+            setTimeout(() => {
+                activeContent.style.opacity = '1';
+            }, 100);
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // ECharts风格配色方案
+            const colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272'];
+
+            // 用电量数据
+            const usageData = [
+                { value: 150, color: '#ee6666', label: 'Peak Hours' },
+                { value: 130, color: '#5470c6', label: 'Normal Hours' },
+                { value: 100, color: '#91cc75', label: 'Off-peak Hours' }
+            ];
+
+            // 费用数据
+            const costData = [
+                { value: 810, color: '#ee6666', label: 'Peak Hours' },
+                { value: 633, color: '#91cc75', label: 'Off-peak Hours' },
+                { value: 585, color: '#5470c6', label: 'Normal Hours' }
+            ];
+
+            // 创建环形图
+            createDonutChart('usageChart', usageData, 380, '');
+            createDonutChart('costChart', costData, 2028, '₹');
+
+            // 动画效果
+            const cards = document.querySelectorAll('.bill-summary-card, .fee-summary-card, .tier-pricing-card, .chart-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 100);
+            });
+
+            // 初始化详情页面tab（默认显示累计趋势）
+            initializeDetailCumulative();
+
+            // 初始化第二个卡片的详情页面tab
+            initializeDetailCumulative2();
+        });
+
+        // 触摸反馈
+        function addTouchFeedback() {
+            const buttons = document.querySelectorAll('.back-btn, .detail-btn');
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                    this.style.opacity = '0.8';
+                });
+
+                button.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.opacity = '1';
+                });
+            });
+        }
+
+        // 初始化触摸反馈
+        addTouchFeedback();
+
+
+        // 当前数据类型
+        let currentDataType = 'usage';
+        let currentDetailDataType = 'usage';
+
+        // 切换数据类型
+        function switchDataType(type) {
+            currentDataType = type;
+
+            document.querySelectorAll('.usage-data-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(type + '-btn').classList.add('active');
+
+            const dailyData = generateUsageDailyData();
+            renderUsageCalendar(dailyData);
+        }
+
+        // 切换详情数据类型
+        function switchDetailDataType(type) {
+            currentDetailDataType = type;
+
+            document.querySelectorAll('.data-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('detail-' + type + '-btn').classList.add('active');
+
+            const dailyData = generateDetailDailyData();
+            renderUsageCalendar(dailyData);
+        }
+
+        // 生成August详情每日数据
+        function generateDetailDailyData() {
+            const data = [];
+            const daysInMonth = 31; // August有31天
+            const monthlyTarget = 380; // August总用电量380kWh
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                // August夏季用电模式
+                const baseDaily = monthlyTarget / daysInMonth;
+                const seasonalFactor = 1.2; // 夏季用电高
+                const weekdayFactor = (i % 7 === 0 || i % 7 === 6) ? 0.8 : 1.1; // 周末用电少
+                const timeVariation = Math.sin((i - 1) / 30 * Math.PI) * 0.3; // 月内波动
+                const randomNoise = (Math.random() - 0.5) * 0.4;
+
+                const usage = baseDaily * seasonalFactor * weekdayFactor * (1 + timeVariation + randomNoise);
+                const finalUsage = Math.max(5, Math.round(usage * 10) / 10);
+
+                data.push({
+                    day: i,
+                    usage: finalUsage,
+                    cost: Math.round(finalUsage * 6.45 * 100) / 100,
+                    rate: 6.45
+                });
+            }
+
+            return data;
+        }
+
+        // 渲染使用量日历
+        function renderUsageCalendar(data) {
+            const calendarGrid = document.getElementById('detailCalendarGrid');
+            if (!calendarGrid) return;
+
+            calendarGrid.innerHTML = '';
+
+            // August 1, 2025 是周四(4)
+            const firstDayOfWeek = 4;
+
+            // 添加空白格子
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // 计算最高最低值
+            const values = data.map(d => currentDetailDataType === 'usage' ? d.usage : d.cost);
+            const maxValue = Math.max(...values);
+            const minValue = Math.min(...values);
+
+            // 找到最高最低值对应的日期
+            const maxItem = data.find(d => (currentDetailDataType === 'usage' ? d.usage : d.cost) === maxValue);
+            const minItem = data.find(d => (currentDetailDataType === 'usage' ? d.usage : d.cost) === minValue);
+
+            // 添加日期数据
+            data.forEach(dayData => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+
+                const currentType = currentDetailDataType;
+                const currentValue = currentType === 'usage' ? dayData.usage : dayData.cost;
+
+                // 添加高亮类 - 只标记第一个最高值和第一个最低值
+                if (dayData.day === maxItem.day) {
+                    dayElement.classList.add('highest');
+                } else if (dayData.day === minItem.day) {
+                    dayElement.classList.add('lowest');
+                }
+
+                dayElement.innerHTML = `
+                    <div class="day-number">${dayData.day}</div>
+                    <div class="day-value">${currentType === 'usage' ? dayData.usage + ' kWh' : '₹' + dayData.cost}</div>
+                `;
+
+                calendarGrid.appendChild(dayElement);
+            });
+        }
+
+        // 详情页面Tab切换功能
+        function switchDetailTab(tabType) {
+            // 更新按钮状态
+            const buttons = document.querySelectorAll('.tab-item');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 更新内容显示
+            const cumulativeDiv = document.getElementById('cumulative-detail-tab');
+            const dailyDiv = document.getElementById('daily-detail-tab');
+
+            if (tabType === 'cumulative') {
+                cumulativeDiv.classList.add('active');
+                dailyDiv.classList.remove('active');
+                const cumulativeData = generateDetailCumulativeData();
+                renderDetailCumulativeChart(cumulativeData);
+            } else {
+                cumulativeDiv.classList.remove('active');
+                dailyDiv.classList.add('active');
+                const dailyData = generateDetailDailyData();
+                renderUsageCalendar(dailyData);
+            }
+        }
+
+        // 生成August详情累计数据
+        function generateDetailCumulativeData() {
+            const data = [];
+            let cumulativeUsage = 0;
+            const daysInMonth = 31; // August有31天
+            const targetUsage = 380; // August总用电量380kWh
+            const dailyBaseUsage = targetUsage / daysInMonth;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                // 生成每日变化（±30%）
+                const variation = (Math.random() - 0.5) * dailyBaseUsage * 0.3;
+                const dailyUsage = Math.max(5, dailyBaseUsage + variation);
+                cumulativeUsage += dailyUsage;
+
+                // 确保最后一天累计正好是380kWh
+                if (day === daysInMonth) {
+                    cumulativeUsage = targetUsage;
+                }
+
+                const cost = cumulativeUsage * 6.45;
+                const usage = Math.round(cumulativeUsage * 10) / 10;
+
+                data.push({
+                    day: day,
+                    cumulativeUsage: usage,
+                    cumulativeCost: Math.round(cost * 100) / 100,
+                    dailyUsage: Math.round(dailyUsage * 10) / 10,
+                    dailyCost: Math.round(dailyUsage * 6.45 * 100) / 100,
+                    usage: usage,
+                    cost: Math.round(cost * 100) / 100,
+                    rate: 6.45
+                });
+            }
+
+            return data;
+        }
+
+        // 渲染累计图表 - 复制September实现
+        function renderDetailCumulativeChart(data) {
+            if (!window.detailChartState) {
+                window.detailChartState = { data: [], showUsage: true, showCost: false };
+            }
+            detailChartState.data = data;
+            const container = document.getElementById('detailSimpleChart');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            // 创建SVG容器
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '250');
+            svg.setAttribute('viewBox', '0 0 500 250');
+
+            // 计算最大值
+            const maxUsage = Math.max(...data.map(d => d.cumulativeUsage));
+
+            // 创建坐标轴
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', '60');
+            xAxis.setAttribute('y1', '210');
+            xAxis.setAttribute('x2', '480');
+            xAxis.setAttribute('y2', '210');
+            xAxis.setAttribute('stroke', '#E5E5E7');
+            xAxis.setAttribute('stroke-width', '1');
+            svg.appendChild(xAxis);
+
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', '60');
+            yAxis.setAttribute('y1', '20');
+            yAxis.setAttribute('x2', '60');
+            yAxis.setAttribute('y2', '210');
+            yAxis.setAttribute('stroke', '#E5E5E7');
+            yAxis.setAttribute('stroke-width', '1');
+            svg.appendChild(yAxis);
+
+
+            // 绘制数据线
+            let pathData = '';
+            data.forEach((d, i) => {
+                const x = 60 + (i / (data.length - 1)) * 420;
+                const y = 210 - (d.cumulativeUsage / maxUsage) * 190;
+                pathData += (i === 0 ? 'M' : 'L') + x + ',' + y;
+            });
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', '#007AFF');
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('fill', 'none');
+            svg.appendChild(path);
+
+            // 绘制数据点（带悬停功能）
+            data.forEach((d, i) => {
+                const x = 60 + (i / (data.length - 1)) * 420;
+                const y = 210 - (d.cumulativeUsage / maxUsage) * 190;
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', '5');
+                circle.setAttribute('fill', '#007AFF');
+                circle.setAttribute('stroke', '#fff');
+                circle.setAttribute('stroke-width', '2');
+                circle.style.cursor = 'pointer';
+
+                // 添加悬停事件
+                circle.addEventListener('mouseenter', (e) => showDetailTooltip(e, d, x));
+                circle.addEventListener('mouseleave', hideDetailTooltip);
+
+                svg.appendChild(circle);
+            });
+
+            // X轴标签 (英文)
+            for (let i = 0; i <= 5; i++) {
+                const x = 60 + (i / 5) * 420;
+                const dayIndex = Math.floor((data.length - 1) * i / 5);
+                if (dayIndex < data.length) {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', x);
+                    text.setAttribute('y', '230');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-size', '12');
+                    text.setAttribute('fill', '#666');
+                    text.textContent = 'Day ' + data[dayIndex].day;
+                    svg.appendChild(text);
+                }
+            }
+
+            // Y轴标签 (显示0,100,200,300,400,500)
+            const yLabels = [0, 100, 200, 300, 400, 500];
+            yLabels.forEach(value => {
+                if (value <= maxUsage || value === 0) {
+                    const y = 210 - (value / maxUsage) * 190;
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', '50');
+                    text.setAttribute('y', y + 4);
+                    text.setAttribute('text-anchor', 'end');
+                    text.setAttribute('font-size', '11');
+                    text.setAttribute('fill', '#666');
+                    text.textContent = value + 'kWh';
+                    svg.appendChild(text);
+                }
+            });
+
+
+            container.appendChild(svg);
+        }
+
+        // 显示详情工具提示 - 英文版本
+        function showDetailTooltip(event, data, xPos) {
+            const tooltip = document.getElementById('detailChartTooltip');
+            const dailyUsage = data.dailyUsage || 0;
+            const dailyCost = data.dailyCost || (dailyUsage * 6.45);
+            const cumulativeCost = data.cumulativeCost || (data.cumulativeUsage * 6.45);
+
+            const tooltipContent = `
+                <div style="text-align: center; margin-bottom: 8px; font-weight: 600; color: #fff;">
+                    August ${data.day}, 2025
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 8px; height: 8px; background: #007AFF; border-radius: 50%;"></div>
+                            <span style="color: #fff; font-size: 11px;">Cumulative Usage</span>
+                        </div>
+                        <span style="color: #007AFF; font-weight: 600; font-size: 12px;">${data.cumulativeUsage} kWh</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 8px; height: 8px; background: #FF6B35; border-radius: 50%;"></div>
+                            <span style="color: #fff; font-size: 11px;">Cumulative Cost</span>
+                        </div>
+                        <span style="color: #FF6B35; font-weight: 600; font-size: 12px;">₹${cumulativeCost.toFixed(2)}</span>
+                    </div>
+                    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 4px 0;">
+                    <div style="text-align: center; color: #ccc; font-size: 10px;">
+                        Daily Usage: ${dailyUsage} kWh | Daily Cost: ₹${dailyCost.toFixed(2)}
+                    </div>
+                </div>
+            `;
+
+            tooltip.innerHTML = tooltipContent;
+            tooltip.classList.add('show');
+
+            // 定位工具提示
+            const containerRect = document.querySelector('.chart-container').getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+
+            let left = event.clientX - containerRect.left - 90; // 居中显示
+            let top = event.clientY - containerRect.top - tooltipRect.height - 15;
+
+            // 边界检查
+            if (left < 10) left = 10;
+            if (left + 180 > containerRect.width - 10) {
+                left = containerRect.width - 190;
+            }
+            if (top < 10) top = event.clientY - containerRect.top + 15;
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+        }
+
+        // 隐藏详情工具提示
+        function hideDetailTooltip() {
+            const tooltip = document.getElementById('detailChartTooltip');
+            if (tooltip) {
+                tooltip.classList.remove('show');
+            }
+        }
+
+        // 初始化详情累计图表
+        function initializeDetailCumulative() {
+            const cumulativeData = generateDetailCumulativeData();
+            renderDetailCumulativeChart(cumulativeData);
+
+            const dailyData = generateDetailDailyData();
+            renderUsageCalendar(dailyData);
+        }
+
+        // 返回功能
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'home-app.html';
+            }
+        }
+
+        // 查看使用明细
+        function viewUsageDetail() {
+            // 跳转到明细页面，传递8月参数
+            window.location.href = 'usage-detail.html?month=2025-08';
+        }
+
+        // 第二个卡片的相关函数
+        let currentDetailDataType2 = 'usage';
+
+        // 切换详情数据类型 - 第二个卡片
+        function switchDetailDataType2(type) {
+            currentDetailDataType2 = type;
+
+            document.querySelectorAll('#detail-usage-btn2, #detail-cost-btn2').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('detail-' + type + '-btn2').classList.add('active');
+
+            const dailyData2 = generateDetailDailyData();
+            renderUsageCalendar2(dailyData2);
+        }
+
+        // 渲染使用量日历 - 第二个卡片
+        function renderUsageCalendar2(data) {
+            const calendarGrid = document.getElementById('detailCalendarGrid2');
+            if (!calendarGrid) return;
+
+            calendarGrid.innerHTML = '';
+
+            // August 1, 2025 是周四(4)
+            const firstDayOfWeek = 4;
+
+            // 添加空白格子
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // 计算最高最低值
+            const values = data.map(d => currentDetailDataType2 === 'usage' ? d.usage : d.cost);
+            const maxValue = Math.max(...values);
+            const minValue = Math.min(...values);
+
+            // 找到最高最低值对应的日期
+            const maxItem = data.find(d => (currentDetailDataType2 === 'usage' ? d.usage : d.cost) === maxValue);
+            const minItem = data.find(d => (currentDetailDataType2 === 'usage' ? d.usage : d.cost) === minValue);
+
+            // 添加日期数据
+            data.forEach(dayData => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+
+                const currentType = currentDetailDataType2;
+                const currentValue = currentType === 'usage' ? dayData.usage : dayData.cost;
+
+                // 添加高亮类 - 只标记第一个最高值和第一个最低值
+                if (dayData.day === maxItem.day) {
+                    dayElement.classList.add('highest');
+                } else if (dayData.day === minItem.day) {
+                    dayElement.classList.add('lowest');
+                }
+
+                dayElement.innerHTML = `
+                    <div class="day-number">${dayData.day}</div>
+                    <div class="day-value">${currentType === 'usage' ? dayData.usage + ' kWh' : '₹' + dayData.cost}</div>
+                `;
+
+                calendarGrid.appendChild(dayElement);
+            });
+        }
+
+        // 详情页面Tab切换功能 - 第二个卡片
+        function switchDetailTab2(tabType) {
+            // 更新按钮状态
+            const buttons = event.target.parentElement.querySelectorAll('.tab-item');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 更新内容显示
+            const cumulativeDiv = document.getElementById('cumulative-detail-tab2');
+            const dailyDiv = document.getElementById('daily-detail-tab2');
+
+            if (tabType === 'cumulative') {
+                cumulativeDiv.classList.add('active');
+                dailyDiv.classList.remove('active');
+                const cumulativeData = generateDetailCumulativeData();
+                renderDetailCumulativeChart2(cumulativeData);
+            } else {
+                cumulativeDiv.classList.remove('active');
+                dailyDiv.classList.add('active');
+                const dailyData = generateDetailDailyData();
+                renderUsageCalendar2(dailyData);
+            }
+        }
+
+        // 渲染累计图表 - 第二个卡片
+        function renderDetailCumulativeChart2(data) {
+            if (!window.detailChartState2) {
+                window.detailChartState2 = { data: [], showUsage: true, showCost: false };
+            }
+            detailChartState2.data = data;
+            const container = document.getElementById('detailSimpleChart2');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            // 创建SVG容器
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '250');
+            svg.setAttribute('viewBox', '0 0 500 250');
+
+            // 计算最大值
+            const maxUsage = Math.max(...data.map(d => d.cumulativeUsage));
+
+            // 创建坐标轴
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', '60');
+            xAxis.setAttribute('y1', '210');
+            xAxis.setAttribute('x2', '480');
+            xAxis.setAttribute('y2', '210');
+            xAxis.setAttribute('stroke', '#E5E5E7');
+            xAxis.setAttribute('stroke-width', '1');
+            svg.appendChild(xAxis);
+
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', '60');
+            yAxis.setAttribute('y1', '20');
+            yAxis.setAttribute('x2', '60');
+            yAxis.setAttribute('y2', '210');
+            yAxis.setAttribute('stroke', '#E5E5E7');
+            yAxis.setAttribute('stroke-width', '1');
+            svg.appendChild(yAxis);
+
+            // 绘制数据线
+            let pathData = '';
+            data.forEach((d, i) => {
+                const x = 60 + (i / (data.length - 1)) * 420;
+                const y = 210 - (d.cumulativeUsage / maxUsage) * 190;
+                pathData += (i === 0 ? 'M' : 'L') + x + ',' + y;
+            });
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', '#007AFF');
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('fill', 'none');
+            svg.appendChild(path);
+
+            // 绘制数据点（带悬停功能）
+            data.forEach((d, i) => {
+                const x = 60 + (i / (data.length - 1)) * 420;
+                const y = 210 - (d.cumulativeUsage / maxUsage) * 190;
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', '5');
+                circle.setAttribute('fill', '#007AFF');
+                circle.setAttribute('stroke', '#fff');
+                circle.setAttribute('stroke-width', '2');
+                circle.style.cursor = 'pointer';
+
+                // 添加悬停事件
+                circle.addEventListener('mouseenter', (e) => showDetailTooltip2(e, d, x));
+                circle.addEventListener('mouseleave', hideDetailTooltip2);
+
+                svg.appendChild(circle);
+            });
+
+            // X轴标签 (英文)
+            for (let i = 0; i <= 5; i++) {
+                const x = 60 + (i / 5) * 420;
+                const dayIndex = Math.floor((data.length - 1) * i / 5);
+                if (dayIndex < data.length) {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', x);
+                    text.setAttribute('y', '230');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-size', '12');
+                    text.setAttribute('fill', '#666');
+                    text.textContent = 'Day ' + data[dayIndex].day;
+                    svg.appendChild(text);
+                }
+            }
+
+            // Y轴标签 (显示0,100,200,300,400,500)
+            const yLabels = [0, 100, 200, 300, 400, 500];
+            yLabels.forEach(value => {
+                if (value <= maxUsage || value === 0) {
+                    const y = 210 - (value / maxUsage) * 190;
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', '50');
+                    text.setAttribute('y', y + 4);
+                    text.setAttribute('text-anchor', 'end');
+                    text.setAttribute('font-size', '11');
+                    text.setAttribute('fill', '#666');
+                    text.textContent = value + 'kWh';
+                    svg.appendChild(text);
+                }
+            });
+
+            container.appendChild(svg);
+        }
+
+        // 显示详情工具提示 - 第二个卡片
+        function showDetailTooltip2(event, data, xPos) {
+            const tooltip = document.getElementById('detailChartTooltip2');
+            const dailyUsage = data.dailyUsage || 0;
+            const dailyCost = data.dailyCost || (dailyUsage * 6.45);
+            const cumulativeCost = data.cumulativeCost || (data.cumulativeUsage * 6.45);
+
+            const tooltipContent = `
+                <div style="text-align: center; margin-bottom: 8px; font-weight: 600; color: #fff;">
+                    August ${data.day}, 2025
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 8px; height: 8px; background: #007AFF; border-radius: 50%;"></div>
+                            <span style="color: #fff; font-size: 11px;">Cumulative Usage</span>
+                        </div>
+                        <span style="color: #007AFF; font-weight: 600; font-size: 12px;">${data.cumulativeUsage} kWh</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 8px; height: 8px; background: #FF6B35; border-radius: 50%;"></div>
+                            <span style="color: #fff; font-size: 11px;">Cumulative Cost</span>
+                        </div>
+                        <span style="color: #FF6B35; font-weight: 600; font-size: 12px;">₹${cumulativeCost.toFixed(2)}</span>
+                    </div>
+                    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 4px 0;">
+                    <div style="text-align: center; color: #ccc; font-size: 10px;">
+                        Daily Usage: ${dailyUsage} kWh | Daily Cost: ₹${dailyCost.toFixed(2)}
+                    </div>
+                </div>
+            `;
+
+            tooltip.innerHTML = tooltipContent;
+            tooltip.classList.add('show');
+
+            // 定位工具提示
+            const containerRect = document.querySelector('.chart-container').getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+
+            let left = event.clientX - containerRect.left - 90; // 居中显示
+            let top = event.clientY - containerRect.top - tooltipRect.height - 15;
+
+            // 边界检查
+            if (left < 10) left = 10;
+            if (left + 180 > containerRect.width - 10) {
+                left = containerRect.width - 190;
+            }
+            if (top < 10) top = event.clientY - containerRect.top + 15;
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+        }
+
+        // 隐藏详情工具提示 - 第二个卡片
+        function hideDetailTooltip2() {
+            const tooltip = document.getElementById('detailChartTooltip2');
+            if (tooltip) {
+                tooltip.classList.remove('show');
+            }
+        }
+
+        // 初始化第二个详情累计图表
+        function initializeDetailCumulative2() {
+            const cumulativeData = generateDetailCumulativeData();
+            renderDetailCumulativeChart2(cumulativeData);
+
+            const dailyData = generateDetailDailyData();
+            renderUsageCalendar2(dailyData);
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
